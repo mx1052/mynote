@@ -194,4 +194,78 @@ print(p.__dict__)
 #2、实例可以调用类所有的变量及方法，除了非法的普通函数的式的定义，因为不合规，所以不用考虑。
 #3、实例调用普通方法靠绑定实例来调用，调用静态方法、类方法，类变量及属性是通过找到类后再调用！！
 
+#私有（Private）属性
+class Person:
 
+    def __init__(self, age):
+        self.__age = age   #变量保存在实例的__dict__中，__age名字将会被修改为_Classname__age
+
+    def show_age(self):
+        # return self.__age  #在内部调用__age会默认调用_Classname__age
+        return self._Person__age
+p1 = Person(30)
+
+print(p1.show_age())
+p1.__age = 50
+print(p1.show_age())
+print(p1.__dict__)
+print(p1.__dict__['__age'])
+
+##########################################
+print(p1.show_age())
+print(p1.__dict__)
+p1._Person__age = 50
+print(p1.show_age())
+print(p1.__dict__)
+#通过改过的名字可以从外部直接修改
+#保护变量、同公有变量一样都可以直接被外部访问，并修改，只是保护变量是python开发者共同遵守的一个协议规范，去看靠自觉。
+#私有的方法也是同私有的属性一致。
+
+#猴子补丁（Monkey Patch）
+#通过模块导入方式实现方法的覆盖。
+
+#属性装饰器
+#方式一
+class Person:
+    def __init__(self,name,age):
+        self.name = name
+        self.__age = age
+    @property
+    def age(self):
+        return self.__age
+
+    @age.setter
+    def age(self,v):
+        self.__age = v
+
+    @age.deleter
+    def age(self):
+        del self.__age
+
+#方式二：
+class Person:
+    def __init__(self,name,age):
+        self.name = name
+        self.__age = age
+
+    def getage(self):
+        return self.__age
+
+    def setage(self,v):
+        self.__age = v
+
+    def delage(self):
+        del self.__age
+
+    age = property(getage, setage, delage, 'age property')
+#属性装饰器一般对私有的变量在外部直接调用属性的方式来直接操作。
+
+#对象销毁
+class Person:
+    def __init__(self,name,age):
+        self.name = name
+        self.__age = age
+
+    def __del__(self):
+        print('delete {}'.format(self.name))
+#__del__方法用于对象的销毁。
